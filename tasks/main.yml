@@ -1,69 +1,36 @@
+---
 # Plex media server install
-# curl https://downloads.plex.tv/plex-keys/PlexSign.key | sudo apt-key add -
-# echo deb https://downloads.plex.tv/repo/deb public main | sudo tee /etc/apt/sources.list.d/plexmediaserver.list
-# sudo apt update
-# sudo apt install plexmediaserver
-# systemctl status plexmediaserver
-# sudo systemctl start plexmediaserver
-# sudo systemctl enable plexmediaserver
+
+# set-up nfs
+# certbot
 # http://localhost:32400/web.
-# sudo certbot --nginx --agree-tos --redirect --hsts --staple-ocsp --email you@example.com -d plex.example.com
 # sudo apt upgrade plexmediaserver -y
-#
-# ---
-# tasks/main.yml
-# - name: 'Add the Plex apt signing key'
-#   become: true
-#   apt_key:
-#     url: 'https://downloads.plex.tv/plex-keys/PlexSign.key'
-#     state: 'present'
-#
-# - name: 'Add the Plex Ubuntu repo'
-#   become: true
-#   apt_repository:
-#     repo: 'deb https://downloads.plex.tv/repo/deb public main'
-#     state: 'present'
-#
-# - name: 'Install the latest version of Plex Media Server'
-#   become: true
-#   apt:
-#     name: 'plexmediaserver'
-#     state: 'latest'
-#   notify: 'restart-ansible-role-plex'
-#
-# - meta: flush_handlers
-# 
-# - name: 'Start the plexmediaserver daemon'
-#   become: true
-#   service:
-#     name: 'plexmediaserver'
-#     state: 'started'
-#     enabled: 'yes'
-#
+
+
+- name: Add Plex APT Key
+  apt_key:
+    url: "https://downloads.plex.tv/plex-keys/PlexSign.key"
+    state: present
+
+- name: Add the Plex APT Repo
+  apt_repository:
+    repo: "https://downloads.plex.tv/repo/deb public main"
+    state: present
+
+- name: Install Plex Media Server
+  apt:
+    name: plexmediaserver
+    state: latest
+    update_cache: yes
+    notify: 'restart-ansible-role-plex'
+
+- name: 'Start the plexmediaserver daemon'
+  service:
+    name: 'plexmediaserver'
+    state: 'started'
+    enabled: 'yes'
+
+
 # defaults/main.yml
 # plex_app_transcode_directory: '/opt/plex_transcode'
 # plex_app_library_directory: '/opt/plex_library'
-#
-# handlers/main.yml
-# ---
-# - name: 'restart-ansible-role-plex'
-#   become: true
-#   service:
-#     name: 'plexmediaserver'
-#     state: 'restarted'
-#
-# meta/main.yml
-# galaxy_info:
-#   author: Marvin Pinto
-#   description: |
-#     Ansible Galaxy role to install and manage plex media server.
-#   license: MIT
-#   min_ansible_version: 2.0
-#   platforms:
-#     - name: Ubuntu
-#       versions:
-#        - trusty
-#   galaxy_tags:
-#     - ubuntu
-#     - plex
-# dependencies: []

@@ -1,0 +1,3 @@
+plex_repo_name: plexmediaserver
+plex_repo_url: deb https://downloads.plex.tv/repo/deb public main
+ssh_user: "vagrant"

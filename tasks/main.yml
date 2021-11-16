@@ -6,6 +6,11 @@
 # http://localhost:32400/web.
 # sudo apt upgrade plexmediaserver -y
 
+- name: Install NFS client
+  apt:
+    name: nfs-common
+    state: present
+    update_cache: yes
 
 - name: Add Plex APT Key
   apt_key:
@@ -14,7 +19,8 @@
 
 - name: Add the Plex APT Repo
   apt_repository:
-    repo: "https://downloads.plex.tv/repo/deb public main"
+    filename: "{{ plex_repo_name }}"
+    repo: "{{ plex_repo_url }}"
     state: present
 
 - name: Install Plex Media Server
@@ -22,7 +28,7 @@
     name: plexmediaserver
     state: latest
     update_cache: yes
-    notify: 'restart-ansible-role-plex'
+  notify: 'restart-ansible-role-plex'
 
 - name: 'Start the plexmediaserver daemon'
   service:
@@ -30,6 +36,27 @@
     state: 'started'
     enabled: 'yes'
 
+- name: Mount NFS NAS video read-only
+  mount:
+    name: /media/video
+    src: nas2.viskum-net.dk:/volume1/video
+    fstype: nfs
+    opts: auto,defaults,nofail,ro,intr
+    state: mounted
+
+- name: Mount NFS NAS music read-only
+  mount:
+    name: /media/music
+    src: nas2.viskum-net.dk:/volume1/music
+    fstype: nfs
+    opts: auto,defaults,nofail,ro,intr
+    state: mounted
+
+- name: Set-up public key for key based SSH logins.
+  authorized_key:
+    user: "{{ ssh_user }}"
+    state: present
+    key: "{{ lookup('file', '/home/viskum/ansible/ssh_keys/id_mac_rsa.pub') }}"
 
 # defaults/main.yml
 # plex_app_transcode_directory: '/opt/plex_transcode'

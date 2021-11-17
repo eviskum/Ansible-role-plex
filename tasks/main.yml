@@ -58,6 +58,27 @@
     state: present
     key: "{{ lookup('file', '/home/viskum/ansible/ssh_keys/id_mac_rsa.pub') }}"
 
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Create nginx config file
+  template:
+    src: nginx-plex.j2
+    dest: /etc/nginx/conf.d/plex.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: 'restart-nginx-role-plex'
+
+- name: 'Start the nginx daemon'
+  service:
+    name: 'nginx'
+    state: 'started'
+    enabled: 'yes'
+
 # defaults/main.yml
 # plex_app_transcode_directory: '/opt/plex_transcode'
 # plex_app_library_directory: '/opt/plex_library'

@@ -4,4 +4,9 @@
   service:
     name: 'plexmediaserver'
     state: 'restarted'
-    
+
+- name: 'restart-nginx-role-plex'
+  become: true
+  service:
+    name: 'nginx'
+    state: 'restarted'
